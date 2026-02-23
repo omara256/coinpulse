@@ -9,17 +9,25 @@ import CoinPagination from '@/components/CoinPagination';
 const Coins = async ({ searchParams }: NextPageProps) => {
   const { page } = await searchParams;
 
-  const currentPage = Number(page) || 1;
+  const currentPage = Math.max(1, Number(page) || 1);
   const perPage = 10;
 
-  const coinsData = await fetcher<CoinMarketData[]>('/coins/markets', {
-    vs_currency: 'usd',
-    order: 'market_cap_desc',
-    per_page: perPage,
-    page: currentPage,
-    sparkline: 'false',
-    price_change_percentage: '24h',
-  });
+  let coinsData: CoinMarketData[] = [];
+  let hasError = false;
+
+  try {
+    coinsData = await fetcher<CoinMarketData[]>('/coins/markets', {
+      vs_currency: 'usd',
+      order: 'market_cap_desc',
+      per_page: perPage,
+      page: currentPage,
+      sparkline: 'false',
+      price_change_percentage: '24h',
+    });
+  } catch (error) {
+    console.error('Failed to fetch coins data:', error);
+    hasError = true;
+  }
 
   const columns: DataTableColumn<CoinMarketData>[] = [
     {
@@ -84,18 +92,26 @@ const Coins = async ({ searchParams }: NextPageProps) => {
       <div className="content">
         <h4>All Coins</h4>
 
-        <DataTable
-          tableClassName="coins-table"
-          columns={columns}
-          data={coinsData}
-          rowKey={(coin) => coin.id}
-        />
+        {hasError ? (
+          <div className="error-message">
+            <p>We're having trouble loading the coins data. Please try again later.</p>
+          </div>
+        ) : (
+          <DataTable
+            tableClassName="coins-table"
+            columns={columns}
+            data={coinsData}
+            rowKey={(coin) => coin.id}
+          />
+        )}
 
-        <CoinPagination
-          currentPage={currentPage}
-          totalPages={estimatedTotalPages}
-          hasMorePages={hasMorePages}
-        />
+        {!hasError && (
+          <CoinPagination
+            currentPage={currentPage}
+            totalPages={estimatedTotalPages}
+            hasMorePages={hasMorePages}
+          />
+        )}
       </div>
     </main>
   );

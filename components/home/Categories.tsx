@@ -4,9 +4,17 @@ import DataTable from '@/components/DataTable';
 import Image from 'next/image';
 import { cn, formatCurrency, formatPercentage } from '@/lib/utils';
 import { TrendingDown, TrendingUp } from 'lucide-react';
+import { CategoriesFallback } from '@/components/home/fallback';
 
 const Categories = async () => {
-  const categories = await fetcher<Category[]>('/coins/categories');
+  let categories;
+
+  try {
+    categories = await fetcher<Category[]>('/coins/categories');
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return <CategoriesFallback />;
+  }
 
   const columns: DataTableColumn<Category>[] = [
     { header: 'Category', cellClassName: 'category-cell', cell: (category) => category.name },
