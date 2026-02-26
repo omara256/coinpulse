@@ -14,7 +14,7 @@ const Page = async ({ params }: NextPageProps) => {
       dex_pair_format: 'contract_address',
     }),
 
-    fetcher<OHLCData>(`/coins/${id}/ohlc`, {
+    fetcher<OHLCData[]>(`/coins/${id}/ohlc`, {
       vs_currency: 'usd',
       days: 1,
       precision: 'full',
@@ -25,7 +25,7 @@ const Page = async ({ params }: NextPageProps) => {
     ? coinData.detail_platforms?.[coinData.asset_platform_id]
     : null;
 
-  const network = platform?.geckoterminal_url.split('/')[3] || null;
+  const network = platform?.geckoterminal_url?.split('/')[3] || null;
   const contractAddress = platform?.contract_address || null;
 
   const pool = await getPools(id, network, contractAddress);
@@ -36,7 +36,7 @@ const Page = async ({ params }: NextPageProps) => {
       value: formatCurrency(coinData.market_data.market_cap.usd),
     },
     {
-      label: 'Market Cap Rack',
+      label: 'Market Cap Rank',
       value: `# ${coinData.market_cap_rank}`,
     },
     {
@@ -66,7 +66,12 @@ const Page = async ({ params }: NextPageProps) => {
   return (
     <main id="coin-details-page">
       <section className="primary">
-        <LiveDataWrapper coinId={id} poolId={pool.id} coin={coinData} coinOHLCData={coinOHLCData}>
+        <LiveDataWrapper
+          coinId={id}
+          poolId={pool?.id || ''}
+          coin={coinData}
+          coinOHLCData={coinOHLCData}
+        >
           <h4>Exchange Listings</h4>
         </LiveDataWrapper>
       </section>

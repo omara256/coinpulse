@@ -11,7 +11,6 @@ import {
 import { CandlestickSeries, createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
 import { fetcher } from '@/lib/coingecko.action';
 import { convertOHLCData } from '@/lib/utils';
-import { setInterval } from 'node:timers';
 
 const CandlestickChart = ({
   children,
@@ -115,12 +114,12 @@ const CandlestickChart = ({
 
     merged.sort((a, b) => a[0] - b[0]);
 
-    const converted = convertOHLCData(convertedToSeconds);
+    const converted = convertOHLCData(merged);
     candleSeriesRef.current.setData(converted);
     chartRef.current?.timeScale().fitContent();
 
-    const dataChanged = prevOhlcDataLength.current !== ohlcData.length;
-  }, [ohlcData, period]);
+    prevOhlcDataLength.current = ohlcData.length;
+  }, [ohlcData, period, liveOhlcv]);
 
   return (
     <div id="candlestick-chart">
